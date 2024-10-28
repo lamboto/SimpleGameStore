@@ -69,6 +69,9 @@ public class AppRunner implements ApplicationRunner {
                 case "DetailsGame":
                     printGame(input);
                     break;
+                case "OwnedGames":
+                    ownedGames();
+                    break;
                 case "BuyGame":
                     result = buyGame(input);
                     break;
@@ -107,6 +110,11 @@ public class AppRunner implements ApplicationRunner {
         System.out.println("AllGames");
         System.out.println("DetailsGame|<gameTitle>");
 
+    }
+
+    private void ownedGames() {
+        loggedUser.getGames()
+                .forEach(e -> System.out.printf("%s %.2f%n", e.getTitle(), e.getPrice()));
     }
 
     private void printGame(String[] input) {
