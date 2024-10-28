@@ -20,7 +20,7 @@ public class Order extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "user_id",referencedColumnName = "id")
     private User user;
-    @OneToMany(fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "order",fetch = FetchType.EAGER)
     private Set<Game> games = new HashSet<>();
 
 }

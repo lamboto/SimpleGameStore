@@ -1,8 +1,6 @@
 package org.app.softunigamestore.entities;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -32,4 +30,12 @@ public class Game extends BaseEntity{
     private String description;
     @Column(name = "release_date")
     private LocalDate releaseDate;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id",referencedColumnName = "id")
+    private User user;
+
+    @ManyToOne
+    @JoinColumn(name = "order_id",referencedColumnName = "id")
+    private Order order;
 }
