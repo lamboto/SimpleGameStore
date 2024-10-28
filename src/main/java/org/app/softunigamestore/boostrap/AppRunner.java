@@ -7,6 +7,7 @@ import org.app.softunigamestore.repositories.GameRepository;
 import org.app.softunigamestore.repositories.OrderRepository;
 import org.app.softunigamestore.repositories.UserRepository;
 import org.app.softunigamestore.services.OrderService;
+import org.app.softunigamestore.services.ShoppingCartService;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
@@ -16,6 +17,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 public class AppRunner implements ApplicationRunner {
@@ -25,13 +27,14 @@ public class AppRunner implements ApplicationRunner {
     private final OrderRepository orderRepository;
     private final OrderService orderService;
     private User loggedUser = null;
-    private Set<Game> shoppingCartGames = new HashSet<>();
+    private final ShoppingCartService shoppingCartService;
 
-    public AppRunner(UserRepository userRepository, GameRepository gameRepository, OrderRepository orderRepository, OrderService orderService) {
+    public AppRunner(UserRepository userRepository, GameRepository gameRepository, OrderRepository orderRepository, OrderService orderService, ShoppingCartService shoppingCartService) {
         this.userRepository = userRepository;
         this.gameRepository = gameRepository;
         this.orderRepository = orderRepository;
         this.orderService = orderService;
+        this.shoppingCartService = shoppingCartService;
     }
 
     @Override
@@ -78,11 +81,56 @@ public class AppRunner implements ApplicationRunner {
                     result = buyGame(input);
                     break;
                 case "AddItem":
+                    result = addItem(input);
+                    break;
+                case "RemoveItem":
+                    result = removeItem(input);
+                    break;
+                case "BuyItem":
+                    result = buyItem();
                     break;
             }
             System.out.println(result);
             input = scanner.nextLine().split("\\|");
         }
+    }
+
+    private String buyItem() {
+        Order order = shoppingCartService.buyItems(loggedUser);
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("Successfully bought games:");
+        sb.append(System.lineSeparator());
+        order.getGames().forEach(e -> sb.append("-")
+                .append(e.getTitle())
+                .append(System.lineSeparator()));
+        return sb.toString();
+    }
+
+    private String removeItem(String[] input) {
+        String gameTitle = input[1];
+        Game game = gameRepository.findByTitle(gameTitle);
+
+        if (game == null) {
+            return "The game does not exist";
+        }
+
+        shoppingCartService.removeItem(loggedUser, gameTitle);
+
+        return String.format("%s removed from cart.", gameTitle);
+    }
+
+    private String addItem(String[] input) {
+        String gameTitle = input[1];
+        Game game = gameRepository.findByTitle(gameTitle);
+
+        if (game == null) {
+            return "The game does not exist";
+        }
+
+        shoppingCartService.addItem(loggedUser, gameTitle);
+
+        return String.format("%s added to cart.", gameTitle);
     }
 
     private String buyGame(String[] input) {
