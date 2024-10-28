@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;
 
@@ -24,6 +25,7 @@ public class AppRunner implements ApplicationRunner {
     private final OrderRepository orderRepository;
     private final OrderService orderService;
     private User loggedUser = null;
+    private Set<Game> shoppingCartGames = new HashSet<>();
 
     public AppRunner(UserRepository userRepository, GameRepository gameRepository, OrderRepository orderRepository, OrderService orderService) {
         this.userRepository = userRepository;
@@ -74,6 +76,8 @@ public class AppRunner implements ApplicationRunner {
                     break;
                 case "BuyGame":
                     result = buyGame(input);
+                    break;
+                case "AddItem":
                     break;
             }
             System.out.println(result);
