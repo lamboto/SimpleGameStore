@@ -18,9 +18,15 @@ import java.util.Set;
 public class Order extends BaseEntity {
 
     @ManyToOne
-    @JoinColumn(name = "user_id",referencedColumnName = "id")
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
-    @OneToMany(mappedBy = "order",fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
+    @JoinTable(
+            name = "orders_games",
+            joinColumns = @JoinColumn(name = "order_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "game_id", referencedColumnName = "id")
+    )
     private Set<Game> games = new HashSet<>();
+
 
 }

@@ -27,8 +27,14 @@ public class User extends BaseEntity {
     @NonNull
     private String fullName;
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
+    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
+    @JoinTable(
+            name = "users_games",
+            joinColumns = @JoinColumn(name = "user_id",referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "game_id",referencedColumnName = "id")
+    )
     private Set<Game> games = new HashSet<>();
+
 
     @Column(name = "administrator")
     private boolean administrator;

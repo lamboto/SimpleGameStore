@@ -1,9 +1,12 @@
 package org.app.softunigamestore.boostrap;
 
 import org.app.softunigamestore.entities.Game;
+import org.app.softunigamestore.entities.Order;
 import org.app.softunigamestore.entities.User;
 import org.app.softunigamestore.repositories.GameRepository;
+import org.app.softunigamestore.repositories.OrderRepository;
 import org.app.softunigamestore.repositories.UserRepository;
+import org.app.softunigamestore.services.OrderService;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
@@ -11,17 +14,22 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
+import java.util.Set;
 
 @Component
 public class AppRunner implements ApplicationRunner {
 
     private final UserRepository userRepository;
     private final GameRepository gameRepository;
+    private final OrderRepository orderRepository;
+    private final OrderService orderService;
     private User loggedUser = null;
 
-    public AppRunner(UserRepository userRepository, GameRepository gameRepository) {
+    public AppRunner(UserRepository userRepository, GameRepository gameRepository, OrderRepository orderRepository, OrderService orderService) {
         this.userRepository = userRepository;
         this.gameRepository = gameRepository;
+        this.orderRepository = orderRepository;
+        this.orderService = orderService;
     }
 
     @Override
@@ -53,12 +61,36 @@ public class AppRunner implements ApplicationRunner {
                     result = editGame(input);
                     break;
                 case "DeleteGame":
-                    deleteGame(input);
+                    result = deleteGame(input);
+                    break;
+                case "AllGames":
+                    printAllGames();
+                    break;
+                case "DetailsGame":
+                    printGame(input);
+                    break;
+                case "BuyGame":
+                    result = buyGame(input);
                     break;
             }
             System.out.println(result);
             input = scanner.nextLine().split("\\|");
         }
+    }
+
+    private String buyGame(String[] input) {
+        String gameName = input[1];
+        Set<Game> games = gameRepository.findByTitleIn(Set.of(gameName));
+
+        if (games.isEmpty()) {
+            return "The game does not exist";
+        }
+        if (loggedUser == null) {
+            return "There is no logged user";
+        }
+
+        orderService.createOrder(loggedUser, games);
+        return "Successfully ordered";
     }
 
     private void options() {
@@ -71,6 +103,23 @@ public class AppRunner implements ApplicationRunner {
         System.out.println("AddGame|<title>|<price>|<size>|<trailer>|<thubnailURL>|<description>|<releaseDate>");
         System.out.println("EditGame|<id>|<values>");
         System.out.println("DeleteGame|<id>");
+        System.out.println("-------------");
+        System.out.println("AllGames");
+        System.out.println("DetailsGame|<gameTitle>");
+
+    }
+
+    private void printGame(String[] input) {
+        Game game = gameRepository.findByTitle(input[1]);
+        System.out.println("Title: " + game.getTitle());
+        System.out.println("Price: " + game.getPrice());
+        System.out.println("Description: " + game.getDescription());
+        System.out.println("ReleaseDate: " + game.getReleaseDate());
+    }
+
+    private void printAllGames() {
+        gameRepository.findAll()
+                .forEach(e -> System.out.printf("%s %.2f%n", e.getTitle(), e.getPrice()));
     }
 
     private String deleteGame(String[] input) {
@@ -91,7 +140,7 @@ public class AppRunner implements ApplicationRunner {
             return "Game not found";
         }
 
-        for (int i = 2; i <= input.length; i++) {
+        for (int i = 2; i < input.length; i++) {
             setFields(input[i].split("="), game);
         }
 
@@ -108,7 +157,7 @@ public class AppRunner implements ApplicationRunner {
         } else if (fieldName.equals("price")) {
             game.setPrice(Double.parseDouble(input[1]));
         } else if (fieldName.equals("size")) {
-            game.setSize(Integer.parseInt(input[1]));
+            game.setSize(Double.parseDouble(input[1]));
         } else if (fieldName.equals("trailer")) {
             game.setTrailer(input[1]);
         } else if (fieldName.equals("thumbnail")) {
@@ -116,7 +165,7 @@ public class AppRunner implements ApplicationRunner {
         } else if (fieldName.equals("description")) {
             game.setDescription(input[1]);
         } else if (fieldName.equals("releaseDate")) {
-            game.setReleaseDate(LocalDate.parse(input[7], DateTimeFormatter.ofPattern("dd-mm-yyyy")));
+            game.setReleaseDate(LocalDate.parse(input[7], DateTimeFormatter.ofPattern("dd-MM-yyyy")));
         }
     }
 
@@ -128,7 +177,7 @@ public class AppRunner implements ApplicationRunner {
                 input[4],
                 input[5],
                 input[6],
-                LocalDate.parse(input[7], DateTimeFormatter.ofPattern("dd-mm-yyyy")));
+                LocalDate.parse(input[7], DateTimeFormatter.ofPattern("dd-MM-yyyy")));
 
         Game savedGame = gameRepository.save(game);
 
