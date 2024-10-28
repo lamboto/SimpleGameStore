@@ -1,4 +1,4 @@
-package org.app.softunigamestore.services;
+package org.app.softunigamestore.services.implementations;
 
 import jakarta.transaction.Transactional;
 import org.app.softunigamestore.entities.Game;
@@ -8,24 +8,26 @@ import org.app.softunigamestore.entities.User;
 import org.app.softunigamestore.repositories.GameRepository;
 import org.app.softunigamestore.repositories.ShoppingCardRepository;
 import org.app.softunigamestore.repositories.UserRepository;
+import org.app.softunigamestore.services.interfaces.ShoppingCartService;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ShoppingCartService {
+public class ShoppingCartServiceImpl implements ShoppingCartService {
 
     private final ShoppingCardRepository cartRepository;
     private final GameRepository gameRepository;
-    private final OrderService orderService;
+    private final OrderServiceImpl orderServiceImpl;
     private final UserRepository userRepository;
 
-    public ShoppingCartService(ShoppingCardRepository cartRepository, GameRepository gameRepository, OrderService orderService, UserRepository userRepository) {
+    public ShoppingCartServiceImpl(ShoppingCardRepository cartRepository, GameRepository gameRepository, OrderServiceImpl orderServiceImpl, UserRepository userRepository) {
         this.cartRepository = cartRepository;
         this.gameRepository = gameRepository;
-        this.orderService = orderService;
+        this.orderServiceImpl = orderServiceImpl;
         this.userRepository = userRepository;
     }
 
     @Transactional
+    @Override
     public ShoppingCart addItem(User user, String gameTitle) {
         ShoppingCart cart = getOrCreateCart(user);
 
@@ -43,6 +45,7 @@ public class ShoppingCartService {
     }
 
     @Transactional
+    @Override
     public ShoppingCart removeItem(User user, String gameTitle) {
         ShoppingCart cart = getOrCreateCart(user);
 
@@ -57,11 +60,11 @@ public class ShoppingCartService {
     }
 
     @Transactional
+    @Override
     public Order buyItems(User user) {
         ShoppingCart cart = getOrCreateCart(user);
 
-
-        Order order = orderService.createOrder(user, cart.getGames());
+        Order order = orderServiceImpl.createOrder(user, cart.getGames());
 
         cart.getGames().clear();
         cartRepository.save(cart);

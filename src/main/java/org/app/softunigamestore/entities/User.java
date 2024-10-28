@@ -2,6 +2,9 @@ package org.app.softunigamestore.entities;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.util.HashSet;
@@ -17,12 +20,17 @@ import java.util.Set;
 public class User extends BaseEntity {
 
     @Column(name = "email", unique = true, nullable = false)
-    @Email
+    @Email(message = "Email is not valid")
     @NonNull
     private String email;
+
+    @Pattern(regexp = "[A-Z]+[a-z]+[0-9]+", message = "Password not valid")
+    @Size(min = 6, message = "Pass length not valid")
     @Column(name = "password", nullable = false)
     @NonNull
     private String password;
+
+    @NotNull(message = "Full name must not be null")
     @Column(name = "full_name", nullable = false)
     @NonNull
     private String fullName;
@@ -36,8 +44,9 @@ public class User extends BaseEntity {
     private Set<Game> games = new HashSet<>();
 
 
-    @Column(name = "administrator")
-    private boolean administrator;
+    @Column(name = "role", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private Role role;
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Set<Order> orders = new HashSet<>();
 

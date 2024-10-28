@@ -1,4 +1,4 @@
-package org.app.softunigamestore.services;
+package org.app.softunigamestore.services.implementations;
 
 import jakarta.transaction.Transactional;
 import org.app.softunigamestore.entities.Game;
@@ -6,22 +6,24 @@ import org.app.softunigamestore.entities.Order;
 import org.app.softunigamestore.entities.User;
 import org.app.softunigamestore.repositories.OrderRepository;
 import org.app.softunigamestore.repositories.UserRepository;
+import org.app.softunigamestore.services.interfaces.OrderService;
 import org.springframework.stereotype.Service;
 
 import java.util.Set;
 
 @Service
-public class OrderService {
+public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
 
-    public OrderService(OrderRepository orderRepository, UserRepository userRepository) {
+    public OrderServiceImpl(OrderRepository orderRepository, UserRepository userRepository) {
         this.orderRepository = orderRepository;
         this.userRepository = userRepository;
     }
 
     @Transactional
+    @Override
     public Order createOrder(User user, Set<Game> games) {
 
         Order order = new Order();
