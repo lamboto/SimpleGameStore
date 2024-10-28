@@ -17,7 +17,7 @@ import java.util.Set;
 @NoArgsConstructor
 public class ShoppingCart extends BaseEntity {
 
-    @OneToOne
+    @OneToOne(mappedBy = "shoppingCart")
     @JoinColumn(name = "user_id",referencedColumnName = "id")
     private User user;
 

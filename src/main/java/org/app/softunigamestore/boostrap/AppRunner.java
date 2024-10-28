@@ -127,6 +127,9 @@ public class AppRunner implements ApplicationRunner {
         if (game == null) {
             return "The game does not exist";
         }
+        if (loggedUser.getGames().contains(game)) {
+            return "User already owned the game";
+        }
 
         shoppingCartService.addItem(loggedUser, gameTitle);
 

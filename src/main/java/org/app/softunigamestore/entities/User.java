@@ -30,8 +30,8 @@ public class User extends BaseEntity {
     @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
     @JoinTable(
             name = "users_games",
-            joinColumns = @JoinColumn(name = "user_id",referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "game_id",referencedColumnName = "id")
+            joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "game_id", referencedColumnName = "id")
     )
     private Set<Game> games = new HashSet<>();
 
@@ -40,4 +40,7 @@ public class User extends BaseEntity {
     private boolean administrator;
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Set<Order> orders = new HashSet<>();
+
+    @OneToOne(cascade = CascadeType.ALL)
+    private ShoppingCart shoppingCart;
 }

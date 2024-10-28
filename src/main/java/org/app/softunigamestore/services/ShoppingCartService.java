@@ -7,6 +7,7 @@ import org.app.softunigamestore.entities.ShoppingCart;
 import org.app.softunigamestore.entities.User;
 import org.app.softunigamestore.repositories.GameRepository;
 import org.app.softunigamestore.repositories.ShoppingCardRepository;
+import org.app.softunigamestore.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -15,11 +16,13 @@ public class ShoppingCartService {
     private final ShoppingCardRepository cartRepository;
     private final GameRepository gameRepository;
     private final OrderService orderService;
+    private final UserRepository userRepository;
 
-    public ShoppingCartService(ShoppingCardRepository cartRepository, GameRepository gameRepository, OrderService orderService) {
+    public ShoppingCartService(ShoppingCardRepository cartRepository, GameRepository gameRepository, OrderService orderService, UserRepository userRepository) {
         this.cartRepository = cartRepository;
         this.gameRepository = gameRepository;
         this.orderService = orderService;
+        this.userRepository = userRepository;
     }
 
     @Transactional
@@ -30,6 +33,9 @@ public class ShoppingCartService {
 
         if (game == null) {
             throw new RuntimeException("Game not found");
+        }
+        if (cart.getGames().contains(game)) {
+            throw new RuntimeException("Game already exists in the shopping cart");
         }
 
         cart.getGames().add(game);
@@ -65,12 +71,16 @@ public class ShoppingCartService {
 
 
     private ShoppingCart getOrCreateCart(User user) {
+        if (user.getShoppingCart() != null) {
+            return user.getShoppingCart();
+        } else {
+            ShoppingCart cart = new ShoppingCart();
+            cart.setUser(user);
+            user.setShoppingCart(cart);
+            cartRepository.save(cart);
 
-        return cartRepository.findByUser(user)
-                .orElseGet(() -> {
-                    ShoppingCart cart = new ShoppingCart();
-                    cart.setUser(user);
-                    return cartRepository.save(cart);
-                });
+            userRepository.save(user);
+            return cart;
+        }
     }
 }
