@@ -1,7 +1,6 @@
 package org.app.softunigamestore.services.implementations;
 
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import org.app.softunigamestore.dtos.UserDto;
 import org.app.softunigamestore.entities.Role;
 import org.app.softunigamestore.entities.User;
@@ -31,4 +30,5 @@ public class UserServiceImpl implements UserService {
     public User findByEmail(String email) {
         return userRepository.findByEmail(email);
     }
+
 }
